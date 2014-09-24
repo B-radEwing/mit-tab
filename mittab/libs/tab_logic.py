@@ -512,7 +512,7 @@ def all_teams():
     return list(Team.objects.all())
 
 def tab_var_break():
-    teams = rank_teams()
+    teams = rank_teams_for_break()
     the_break = teams[0:TabSettings.objects.get(key = "var_teams_to_break").value]
     pairings = []
     for i in range(len(the_break)):
@@ -543,16 +543,33 @@ def team_comp(pairing, round_number):
 
 def team_score(team):
     """A tuple representing the passed team's performance at the tournament"""
+
     score = (0,0,0,0,0,0,0,0)
     try:
         score = (-tot_wins(team),
+                 tot_ranks(team), # Pair inrounds on ranks first.
                  -tot_speaks(team),
-                  tot_ranks(team),
-                 -single_adjusted_speaks(team),
-                  single_adjusted_ranks(team),
+                 single_adjusted_ranks(team),
+                 -single_adjusted_speaks(team),                 
+                 double_adjusted_ranks(team),
                  -double_adjusted_speaks(team),
-                  double_adjusted_ranks(team),
                  -opp_strength(team))
+    except Exception:
+        print "Could not calculate team score for {}".format(team)
+    return score
+
+def team_score_for_break(team):
+    """A tuple representing the passed team's performance at the tournament"""
+
+    score = (0,0,0,0,0,0,0,0)
+    try:
+        score = (-tot_wins(team),
+                 (tot_ranks(team) - opp_strength(team)) , # Ranks minus opposition wins.
+                 -tot_speaks(team),
+                 single_adjusted_ranks(team),
+                 -single_adjusted_speaks(team),                 
+                 double_adjusted_ranks(team),
+                 -double_adjusted_speaks(team))
     except Exception:
         print "Could not calculate team score for {}".format(team)
     return score
@@ -563,11 +580,14 @@ def team_score_except_record(team):
 def rank_teams():
     return sorted(all_teams(), key=team_score)
 
+def rank_teams_for_break():
+    return sorted(all_teams(), ley=team_score_for_break)
+
 def rank_teams_except_record(teams):
     return sorted(teams, key=team_score_except_record)
 
 def rank_nov_teams():
-    return sorted(all_nov_teams(), key=team_score)
+    return sorted(all_nov_teams(), key=team_score_for_break)
 
 ###################################
 """ Debater Speaks Calculations """
