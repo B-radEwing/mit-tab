@@ -581,7 +581,7 @@ def rank_teams():
     return sorted(all_teams(), key=team_score)
 
 def rank_teams_for_break():
-    return sorted(all_teams(), ley=team_score_for_break)
+    return sorted(all_teams(), key=team_score_for_break)
 
 def rank_teams_except_record(teams):
     return sorted(teams, key=team_score_except_record)
