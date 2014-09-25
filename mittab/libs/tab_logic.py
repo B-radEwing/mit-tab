@@ -493,7 +493,9 @@ def double_adjusted_ranks(team):
     ranks = sorted([item for sublist in ranks for item in sublist])
     return sum(ranks[2:-2])
 
+@cache()
 def opp_strength(t):
+    # Final inrounds tiebreaker
     opp_record = 0
     myGovRounds = Round.objects.filter(gov_team = t)
     myOppRounds = Round.objects.filter(opp_team = t)
@@ -502,6 +504,27 @@ def opp_strength(t):
     for r in myOppRounds:
         opp_record +=tot_wins(r.gov_team)
     return opp_record
+
+def opp_strength_no_round1(t):
+    # For the break
+    opp_record = 0
+    myGovRounds = Round.objects.filter(gov_team = t)
+    myOppRounds = Round.objects.filter(opp_team = t)
+    for r in myGovRounds:
+        if r.round_number != 1:
+            opp_record +=tot_wins(r.opp_team)
+    for r in myOppRounds:
+        if r.round_number != 1:
+            opp_record +=tot_wins(r.gov_team)
+    return opp_record
+
+
+@cache()
+def ranks_minus_opp_wins(t):
+    # For break purposes
+    total_ranks = tot_ranks(t)
+    opp_record = opp_strength_no_round1(t)
+    return int(total_ranks - opp_record)
     
 # Return a list of all teams who have no varsity members 
 def all_nov_teams():
@@ -521,7 +544,7 @@ def tab_var_break():
 
 
 def tab_nov_break():
-    novice_teams = rank_nov_teams()
+    novice_teams = rank_nov_teams_for_break()
     nov_break = novice_teams[0:TabSettings.objects.get(key = "nov_teams_to_break").value]
     pairings = []
     for i in range(len(nov_break)):
@@ -564,7 +587,7 @@ def team_score_for_break(team):
     score = (0,0,0,0,0,0,0,0)
     try:
         score = (-tot_wins(team),
-                 (tot_ranks(team) - opp_strength(team)) , # Ranks minus opposition wins.
+                 (tot_ranks(team) - opp_strength_no_round1(team)) , # Ranks minus opposition wins.
                  -tot_speaks(team),
                  single_adjusted_ranks(team),
                  -single_adjusted_speaks(team),                 
@@ -581,13 +604,18 @@ def rank_teams():
     return sorted(all_teams(), key=team_score)
 
 def rank_teams_for_break():
-    return sorted(all_teams(), key=team_score_for_break)
+    the_break = sorted(all_teams(), key=team_score_for_break)
+    return the_break[:16]
 
 def rank_teams_except_record(teams):
     return sorted(teams, key=team_score_except_record)
 
 def rank_nov_teams():
-    return sorted(all_nov_teams(), key=team_score_for_break)
+    return sorted(all_nov_teams(), key=team_score)
+
+def rank_nov_teams_for_break():
+    nov_break = sorted(all_nov_teams(), key=team_score_for_break)
+    return nov_break[:10]
 
 ###################################
 """ Debater Speaks Calculations """

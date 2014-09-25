@@ -349,7 +349,8 @@ def rank_teams(request):
     teams = [(team,
               tab_logic.tot_wins(team),
               tab_logic.tot_speaks(team),
-              tab_logic.tot_ranks(team))
+              tab_logic.tot_ranks(team),
+              tab_logic.opp_strength(team))
               for team in ranked_teams]
 
     print "started novice rankings: ", datetime.now()
@@ -357,7 +358,8 @@ def rank_teams(request):
     nov_teams = [(team,
                   tab_logic.tot_wins(team),
                   tab_logic.tot_speaks(team),
-                  tab_logic.tot_ranks(team))
+                  tab_logic.tot_ranks(team),
+                  tab_logic.opp_strength(team))
                   for team in ranked_novice_teams]
 
     print "Got ranked novice teams"
@@ -366,6 +368,35 @@ def rank_teams(request):
                               'novice': nov_teams,
                               'title': "Team Rankings"},
                               context_instance=RequestContext(request))
+
+def rank_break(request):
+    print "starting break: ", datetime.now()
+    varsity_break = tab_logic.rank_teams_for_break()
+    teams = [(team,
+              tab_logic.tot_wins(team),
+              tab_logic.ranks_minus_opp_wins(team),
+              tab_logic.tot_speaks(team),
+              tab_logic.tot_ranks(team),
+              tab_logic.opp_strength_no_round1(team))
+              for team in varsity_break]
+    print "Got ranked varsity teams"
+
+    print "starting novice break: ", datetime.now()
+    novice_break = tab_logic.rank_nov_teams_for_break()
+    nov_teams = [(team,
+              tab_logic.tot_wins(team),
+              tab_logic.ranks_minus_opp_wins(team),
+              tab_logic.tot_speaks(team),
+              tab_logic.tot_ranks(team),
+              tab_logic.opp_strength_no_round1(team))
+              for team in novice_break]
+    print "Got ranked novice teams"
+
+    return render_to_response('rank_break.html',
+                           {'varsity': teams,
+                            'novice': nov_teams,
+                            'title': "The Break"},
+                            context_instance=RequestContext(request))
 
 def team_stats(request, team_id):
     team_id = int(team_id)

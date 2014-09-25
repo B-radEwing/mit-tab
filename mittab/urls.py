@@ -65,6 +65,7 @@ urlpatterns = patterns('',
     url(r'^team/card/(\d+)/pretty/$', team_views.pretty_tab_card),
     url(r'^team/ranking/$', team_views.rank_teams_ajax),
     url(r'^team/rank/$', team_views.rank_teams),
+    url(r'^team/break/$', team_views.rank_break),
 
     # Debater related
     url(r'^debater/(\d+)/$', debater_views.view_debater),
