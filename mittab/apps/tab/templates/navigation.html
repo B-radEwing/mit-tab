@@ -15,6 +15,7 @@
 {% url "mittab.apps.tab.team_views.view_teams" as view_teams%}
 {% url "mittab.apps.tab.team_views.rank_teams_ajax" as rank_teams %}
 {% url "mittab.apps.tab.team_views.all_tab_cards" as tab_cards %}
+{% url "mittab.apps.tab.team_views.rank_break" as rank_break %}
 
 {% url "mittab.apps.tab.debater_views.enter_debater" as enter_debater %}
 {% url "mittab.apps.tab.debater_views.view_debaters" as view_debaters %}
@@ -35,6 +36,7 @@
             <ul id = "sublist">
                 <li><a class="{%active request view_status %}" href="{{ view_status }}">Current Round</a></li>
                 <li><a class="{%active request view_rounds %}" href="{{ view_rounds }}">All Rounds</a></li>
+                <li><a class="{%active request rank_break %}" href="{{ rank_break }}">The Break</a></li>
             </ul>
         </li>
 
